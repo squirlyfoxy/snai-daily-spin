@@ -1,0 +1,8 @@
+# your snai credentials.
+[login]
+username = "your_username"
+password = "your_password"
+
+# your system's information.
+[system]
+browser = "Firefox"
