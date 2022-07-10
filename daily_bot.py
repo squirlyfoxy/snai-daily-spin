@@ -51,6 +51,12 @@ def Spin(driver: webdriver.Remote):
 def CheckIFDailySpinAvaible(driver: webdriver.Remote):
     print("Checking if daily spin is available")
 
+    # GOL.daily_spin.vince = 0 if i will not win
+    if driver.execute_script("return GOL.daily_spin.vince") == 1:
+        print("You will win")
+    else:
+        print("You will not win") 
+
     return True
 
 # 
@@ -133,6 +139,7 @@ if found == False:
     exit(1)
 
 if CheckIFDailySpinAvaible(driver):
-    Spin(driver)
+    #Spin(driver)
+    print("Daily spin is available")
 
 driver.quit()
