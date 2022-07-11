@@ -1,4 +1,5 @@
 from os import system
+from datetime import datetime as dt
 import threading
 from time import sleep
 from selenium import webdriver, common
@@ -57,6 +58,8 @@ def CheckIFDailySpinAvaible(driver: webdriver.Remote):
     else:
         print("You will not win") 
 
+    # TODO: check if the daily spin is available
+
     return True
 
 # 
@@ -107,7 +110,7 @@ if BotConfig.getBrowser() == "Chrome":
 elif BotConfig.getBrowser() == "Firefox":
     capabilities = webdriver.DesiredCapabilities.FIREFOX
     options = webdriver.FirefoxOptions()
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
 
     # start geckodriver (another thread)
     x = threading.Thread(target=RunFirefoxDriver)
@@ -117,29 +120,46 @@ else:
     exit(1)
 
 sleep(5)
-driver = webdriver.Remote(command_executor='http://127.0.0.1:4444', desired_capabilities=capabilities, options=options)
 
-driver.get(StartUrl)
-AccessDailySpin(driver)
+first_time = True
 
-# after that a new window will be opened with the game
-# we need to switch to that window
-found = False
-for handle in driver.window_handles:
-    driver.switch_to.window(handle)
-    if driver.current_url == "https://www.snai.it/play/games/1516":
-        found = True
+while True:
+    date_time = dt.now()
+    # format as 24hrs
+    date_time_str = date_time.strftime("%H:%M:%S")
 
-        # TODO: Mute the game
+    # check if a day has passed
+    if (date_time.hour == 0 and date_time.minute == 0 and date_time.second >= 0) or (first_time == True):
+        driver = webdriver.Remote(command_executor='http://127.0.0.1:4444', desired_capabilities=capabilities, options=options)
+        
+        first_time = False
+        
+        driver.get(StartUrl)
+        AccessDailySpin(driver)
 
-        break
-    
-if found == False:
-    print("Could not find the game window, aborting")
-    exit(1)
+        # after that a new window will be opened with the game
+        # we need to switch to that window
+        found = False
+        for handle in driver.window_handles:
+            driver.switch_to.window(handle)
+            if driver.current_url.startswith("https://www.snai.it/play/games/1516"):
+                found = True
 
-if CheckIFDailySpinAvaible(driver):
-    #Spin(driver)
-    print("Daily spin is available")
+                # TODO: Mute the game
 
-driver.quit()
+                break
+            
+        if found == False:
+            print("Could not find the game window, aborting")
+            exit(1)
+
+        if CheckIFDailySpinAvaible(driver):
+            print("Daily spin is available")
+
+            Spin(driver)
+
+        sleep(10) # wait 10 seconds before closing the window (spin time)
+
+        # close the windows
+        driver.quit()
+
