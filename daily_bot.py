@@ -32,10 +32,16 @@ class BotConfiguration:
 BotConfig = BotConfiguration()
 
 # 
-# Thread for the driver
+# Thread for the firefox driver
 #
 def RunFirefoxDriver():
     system("./geckodriver")
+
+# 
+# Thread for the chrome driver
+#
+def RunChromeDriver():
+    system("./chromedriver")
 
 #
 # Function to spin
@@ -107,6 +113,10 @@ if BotConfig.getBrowser() == "Chrome":
     capabilities = webdriver.DesiredCapabilities.CHROME
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
+
+    # start chromedriver (another thread)
+    x = threading.Thread(target=RunChromeDriver)
+    x.start()
 elif BotConfig.getBrowser() == "Firefox":
     capabilities = webdriver.DesiredCapabilities.FIREFOX
     options = webdriver.FirefoxOptions()
